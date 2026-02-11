@@ -17,7 +17,9 @@ export class BovedaDB extends Dexie {
 
   constructor() {
     super('BovedaDB_V3');
-    // Fix: Moved version definition inside the constructor to ensure 'this.version' is correctly typed from Dexie base class
+    
+    // Fix: Use the inherited version method correctly. 
+    // Property 'version' is a method on Dexie class used to define the schema.
     this.version(1).stores({
       notes: 'id, collectionId, isFavorite, createdAt, updatedAt',
       documents: 'id, collectionId, createdAt',
