@@ -1,0 +1,8 @@
+{
+  "name": "Bóveda Personal",
+  "description": "Tu asistente privado y offline para almacenamiento seguro.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}

@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bóveda Personal</title>
+    <meta name="description" content="Tu asistente de privacidad 100% local">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            DEFAULT: '#0a0a0a',
+                            surface: '#121212',
+                            border: '#1f1f1f',
+                            accent: '#3b82f6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0a0a0a; color: #e5e5e5; }
+        .senior-mode { font-size: 1.25rem; }
+        .senior-mode button { padding: 1.5rem; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 10px; }
+        /* Evitar saltos de layout en carga */
+        #root { min-height: 100vh; display: flex; flex-direction: column; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "zustand": "https://esm.sh/zustand@^5.0.11",
+    "dexie": "https://esm.sh/dexie@^4.3.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "path": "https://esm.sh/path@^0.12.7",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+</head>
+<body class="antialiased selection:bg-blue-500/30">
+    <div id="root"></div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Registro con ruta relativa para evitar errores de origen cruzado
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.warn('Service Worker: El registro falló o fue bloqueado por el entorno:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
