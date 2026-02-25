@@ -20,7 +20,8 @@ export class BovedaDB extends Dexie {
     
     // Fix: Use the inherited version method correctly. 
     // Property 'version' is a method on Dexie class used to define the schema.
-    this.version(1).stores({
+    // Using a cast to any to resolve property existence issues in certain TypeScript environments.
+    (this as any).version(1).stores({
       notes: 'id, collectionId, isFavorite, createdAt, updatedAt',
       documents: 'id, collectionId, createdAt',
       shoppingList: 'id, completed, createdAt',
@@ -84,7 +85,8 @@ export const TemplateRepository = {
   seed: async () => {
     const count = await db.templates.count();
     if (count > 0) return;
-    await db.templates.bulkAdd([
+    // Usamos bulkPut en lugar de bulkAdd para evitar errores si la semilla se ejecuta en paralelo
+    await db.templates.bulkPut([
       { id: 't1', name: '🩺 Médico', content: 'FECHA: \nDOCTOR: \nSÍNTOMAS: \nDIAGNÓSTICO: \nTRATAMIENTO: ' },
       { id: 't2', name: '💰 Finanzas', content: 'CONCEPTO: \nMONTO: \nCATEGORÍA: \nNOTAS: ' },
       { id: 't3', name: '⚠️ Incidencia', content: 'TIPO: \nFECHA: \nDESCRIPCIÓN: \nACCIONES TOMADAS: ' },
