@@ -16,7 +16,7 @@ export class BovedaDB extends Dexie {
   constructor() {
     super('BovedaDB_V3');
     
-    (this as any).version(1).stores({
+    (this as BovedaDB).version(1).stores({
       notes: 'id, collectionId, isFavorite, createdAt, updatedAt',
       documents: 'id, collectionId, createdAt',
       shoppingList: 'id, completed, createdAt',

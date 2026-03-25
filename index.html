@@ -9,6 +9,8 @@
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bóveda">
+    <link rel="apple-touch-icon" href="https://picsum.photos/seed/boveda/192/192">
     <style>
         body { 
             background-color: #0a0a0a; 
@@ -56,10 +58,11 @@
     <script>
         // Eliminar splash screen cuando React tome el control
         window.addEventListener('load', () => {
-            // El desregistro de SW es preventivo para evitar bloqueos de caché en desarrollo
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(regs => {
-                    for(let reg of regs) reg.unregister();
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('Bóveda SW registrada con éxito');
+                }).catch(err => {
+                    console.error('Error al registrar SW:', err);
                 });
             }
         });

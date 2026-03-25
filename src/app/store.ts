@@ -27,7 +27,7 @@ const STORAGE_KEYS = {
   LOCK_TIME: 'bv_lock_until'
 };
 
-const getSafeJSON = (key: string, fallback: any) => {
+const getSafeJSON = <T>(key: string, fallback: T): T => {
   try {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : fallback;

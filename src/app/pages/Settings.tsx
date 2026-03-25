@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store';
-import { Button, Card } from '../../shared/ui';
+import { Button, Card, Input, Modal } from '../../shared/ui';
+import { db, Logger } from '../../infra/db';
+import { Template } from '../../domain/types';
 
 export const SettingsPage: React.FC = () => {
   const { settings, updateSettings, wipe } = useStore();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const loadTemplates = async () => {
+    const all = await db.templates.toArray();
+    setTemplates(all);
+  };
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const handleSaveTemplate = async () => {
+    if (!editingTemplate) return;
+    await db.templates.put(editingTemplate);
+    await Logger.log("AJUSTES", `Plantilla actualizada: ${editingTemplate.name}`);
+    setIsModalOpen(false);
+    loadTemplates();
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -23,6 +45,22 @@ export const SettingsPage: React.FC = () => {
             >
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.seniorMode ? 'left-7' : 'left-1'}`} />
             </button>
+          </div>
+        </Card>
+      </section>
+
+      <section className="space-y-4">
+        <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Gestión de Plantillas</h3>
+        <Card className="space-y-4">
+          <div className="grid grid-cols-1 gap-2">
+            {templates.map(t => (
+              <div key={t.id} className="flex justify-between items-center p-3 bg-dark border border-dark-border rounded-lg">
+                <span className="text-sm font-bold text-white">{t.name}</span>
+                <Button size="sm" variant="ghost" onClick={() => { setEditingTemplate(t); setIsModalOpen(true); }}>
+                  Editar
+                </Button>
+              </div>
+            ))}
           </div>
         </Card>
       </section>
@@ -73,6 +111,32 @@ export const SettingsPage: React.FC = () => {
           </Button>
         </Card>
       </section>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Editar Plantilla">
+        {editingTemplate && (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">Nombre de la Plantilla</label>
+              <Input 
+                value={editingTemplate.name} 
+                onChange={e => setEditingTemplate({...editingTemplate, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">Contenido Predefinido</label>
+              <textarea 
+                className="w-full bg-dark border border-dark-border rounded-lg p-4 text-sm text-gray-200 min-h-[200px] focus:outline-none focus:border-blue-500 transition-colors"
+                value={editingTemplate.content}
+                onChange={e => setEditingTemplate({...editingTemplate, content: e.target.value})}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex-grow" onClick={handleSaveTemplate}>Guardar Cambios</Button>
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

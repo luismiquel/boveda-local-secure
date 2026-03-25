@@ -17,15 +17,23 @@ async function startServer() {
     next();
   });
 
-  // Middleware de Vite para desarrollo
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  });
-  app.use(vite.middlewares);
+  // Middleware de Vite para desarrollo o servir estáticos en producción
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(__dirname, 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor de Bóveda Personal corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor de Bóveda Personal corriendo en puerto ${PORT}`);
   });
 }
 
