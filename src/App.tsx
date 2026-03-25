@@ -121,8 +121,8 @@ const AppContent: React.FC<{ onError: (e: Error) => void }> = ({ onError }) => {
 
       <main className="flex-grow p-4 md:p-12 pb-32 max-w-6xl mx-auto w-full flex flex-col items-center">
         <div className="w-full">
-          {activeTab === 'notes' && <NotesPage />}
-          {activeTab === 'docs' && <DocumentsPage />}
+          {activeTab === 'notes' && <NotesPage searchTerm={globalSearch} />}
+          {activeTab === 'docs' && <DocumentsPage searchTerm={globalSearch} />}
           {activeTab === 'passwords' && <PasswordsPage />}
           {activeTab === 'voice' && <VoiceNotesPage />}
           {activeTab === 'shopping' && <ShoppingPage />}
@@ -137,6 +137,7 @@ const AppContent: React.FC<{ onError: (e: Error) => void }> = ({ onError }) => {
         <NavBtn act={activeTab === 'passwords'} onClick={() => setActiveTab('passwords')} label="Claves" icon="🔑" />
         <NavBtn act={activeTab === 'voice'} onClick={() => setActiveTab('voice')} label="Voz" icon="🎙️" />
         <NavBtn act={activeTab === 'shopping'} onClick={() => setActiveTab('shopping')} label="Lista" icon="🛒" />
+        <NavBtn act={activeTab === 'activity'} onClick={() => setActiveTab('activity')} label="Logs" icon="📊" />
         <NavBtn act={activeTab === 'settings'} onClick={() => setActiveTab('settings')} label="Ajustes" icon="⚙️" />
       </nav>
     </div>

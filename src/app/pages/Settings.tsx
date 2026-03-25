@@ -104,59 +104,116 @@ export const SettingsPage: React.FC = () => {
         <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Copia de Seguridad</h3>
         <Card className="space-y-4">
           <p className="text-xs text-gray-500 leading-relaxed">
-            Exporta todos tus datos cifrados en un archivo JSON. Puedes usar este archivo para restaurar tu bóveda en otro dispositivo.
+            Exporta o importa todos tus datos cifrados en un archivo JSON.
           </p>
-          <Button 
-            variant="secondary" 
-            className="w-full flex items-center justify-center gap-2"
-            onClick={async () => {
-              try {
-                const allNotes = await db.notes.toArray();
-                const allDocs = await db.documents.toArray();
-                const allPasswords = await db.passwords.toArray();
-                const allShopping = await db.shoppingList.toArray();
-                
-                const backup = {
-                  version: '3.5.0',
-                  timestamp: Date.now(),
-                  data: {
-                    notes: allNotes,
-                    documents: allDocs,
-                    passwords: allPasswords,
-                    shoppingList: allShopping
-                  }
-                };
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Button 
+              variant="secondary" 
+              className="w-full flex items-center justify-center gap-2"
+              onClick={async () => {
+                try {
+                  const allNotes = await db.notes.toArray();
+                  const allDocs = await db.documents.toArray();
+                  const allPasswords = await db.passwords.toArray();
+                  const allShopping = await db.shoppingList.toArray();
+                  
+                  const backup = {
+                    version: '3.5.0',
+                    timestamp: Date.now(),
+                    data: {
+                      notes: allNotes,
+                      documents: allDocs,
+                      passwords: allPasswords,
+                      shoppingList: allShopping
+                    }
+                  };
 
-                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `boveda_backup_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                await Logger.log("SISTEMA", "Copia de seguridad exportada correctamente");
-                alert("Copia de seguridad exportada con éxito.");
-              } catch (e) {
-                console.error(e);
-                alert("Error al exportar la copia de seguridad.");
-              }
-            }}
-          >
-            Exportar Backup (JSON)
-          </Button>
+                  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `boveda_backup_${new Date().toISOString().split('T')[0]}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  
+                  await Logger.log("SISTEMA", "Copia de seguridad exportada correctamente");
+                  alert("Copia de seguridad exportada con éxito.");
+                } catch (e) {
+                  console.error(e);
+                  alert("Error al exportar la copia de seguridad.");
+                }
+              }}
+            >
+              Exportar (JSON)
+            </Button>
+            <Button 
+              variant="secondary" 
+              className="w-full flex items-center justify-center gap-2 relative overflow-hidden"
+            >
+              Importar (JSON)
+              <input 
+                type="file" 
+                accept=".json"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (!confirm("¿Deseas importar este backup? Se SOBREESCRIBIRÁN los datos actuales.")) return;
+                  
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    try {
+                      const backup = JSON.parse(event.target?.result as string);
+                      if (!backup.data) throw new Error("Formato inválido");
+                      
+                      await db.transaction('rw', [db.notes, db.documents, db.passwords, db.shoppingList], async () => {
+                        await db.notes.clear();
+                        await db.documents.clear();
+                        await db.passwords.clear();
+                        await db.shoppingList.clear();
+                        
+                        if (backup.data.notes) await db.notes.bulkPut(backup.data.notes);
+                        if (backup.data.documents) await db.documents.bulkPut(backup.data.documents);
+                        if (backup.data.passwords) await db.passwords.bulkPut(backup.data.passwords);
+                        if (backup.data.shoppingList) await db.shoppingList.bulkPut(backup.data.shoppingList);
+                      });
+                      
+                      await Logger.log("SISTEMA", "Copia de seguridad importada con éxito");
+                      alert("Datos importados correctamente. La aplicación se reiniciará.");
+                      window.location.reload();
+                    } catch (err) {
+                      console.error(err);
+                      alert("Error al importar el archivo. Formato no compatible.");
+                    }
+                  };
+                  reader.readAsText(file);
+                }}
+              />
+            </Button>
+          </div>
         </Card>
       </section>
 
       <section className="space-y-4 pt-10">
         <h3 className="text-xs font-black text-red-500 uppercase tracking-widest">Zona de Peligro</h3>
-        <Card className="border-red-900/30 bg-red-900/5">
-          <p className="text-xs text-red-200/60 mb-4 leading-relaxed">
+        <Card className="border-red-900/30 bg-red-900/5 space-y-4">
+          <p className="text-xs text-red-200/60 leading-relaxed">
             La destrucción de datos es irreversible. Se borrarán todas las notas, documentos, claves y configuraciones de seguridad de este dispositivo.
           </p>
-          <Button variant="danger" className="w-full" onClick={() => confirm("¿ESTÁS SEGURO? Esta acción no se puede deshacer.") && wipe()}>
-            Destruir Bóveda (Wipe Total)
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button variant="ghost" className="w-full text-red-400 hover:bg-red-900/20" onClick={async () => {
+              if (confirm("¿Borrar historial de actividad?")) {
+                await db.logs.clear();
+                await Logger.log("SISTEMA", "Historial de actividad borrado manualmente");
+                alert("Historial borrado.");
+              }
+            }}>
+              Limpiar Historial de Actividad
+            </Button>
+            <Button variant="danger" className="w-full" onClick={() => confirm("¿ESTÁS SEGURO? Esta acción no se puede deshacer.") && wipe()}>
+              Destruir Bóveda (Wipe Total)
+            </Button>
+          </div>
         </Card>
       </section>
 

@@ -6,7 +6,7 @@ import { Button, Card, Input, Modal } from '../../shared/ui';
 import { Document, ID } from '../../domain/types';
 import { FileText, Printer, Trash2, Shield, Plus } from 'lucide-react';
 
-export const DocumentsPage: React.FC = () => {
+export const DocumentsPage: React.FC<{ searchTerm?: string }> = ({ searchTerm = '' }) => {
   const { dek } = useStore();
   const [docs, setDocs] = useState<(Document & { decryptedName?: string; decryptedContent?: string; decryptedCategory?: string })[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +44,12 @@ export const DocumentsPage: React.FC = () => {
   useEffect(() => {
     loadDocs();
   }, [dek, loadDocs]);
+
+  const filteredDocs = docs.filter(d => 
+    d.decryptedName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    d.decryptedContent?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    d.decryptedCategory?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSave = async () => {
     if (!dek || !tempName) return;
@@ -101,21 +107,42 @@ export const DocumentsPage: React.FC = () => {
 
       <div className="flex flex-col items-center gap-6 mb-12">
         <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-center">Documentos Seguros</h2>
-        <Button className="flex items-center gap-2 px-8" onClick={() => { setEditingDoc(null); setTempName(''); setTempContent(''); setTempCategory('General'); setIsModalOpen(true); }}>
-          <Plus className="w-4 h-4" />
-          Nuevo Documento
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="secondary" className="flex items-center gap-2 px-8" onClick={() => {
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+            const docsHtml = filteredDocs.map(d => `
+              <div style="page-break-after: always; padding: 1in; font-family: Georgia, serif;">
+                <h1 style="font-size: 24pt; border-bottom: 2px solid #000; margin-bottom: 10px;">${d.decryptedName || 'Sin nombre'}</h1>
+                <p style="font-style: italic; color: #666;">Categoría: ${d.decryptedCategory} | Fecha: ${new Date(d.createdAt).toLocaleDateString()}</p>
+                <div style="white-space: pre-wrap; margin-top: 20px; font-size: 12pt; line-height: 1.6;">${d.decryptedContent}</div>
+                <footer style="margin-top: 50px; border-top: 1px solid #eee; font-size: 8pt; color: #999; text-align: center;">
+                  Documento oficial generado desde Bóveda Personal (Entorno Seguro y Local).
+                </footer>
+              </div>
+            `).join('');
+            printWindow.document.write(`<html><body onload="window.print();window.close();">${docsHtml}</body></html>`);
+            printWindow.document.close();
+          }}>
+            <Printer className="w-4 h-4" />
+            PDF
+          </Button>
+          <Button className="flex items-center gap-2 px-8" onClick={() => { setEditingDoc(null); setTempName(''); setTempContent(''); setTempCategory('General'); setIsModalOpen(true); }}>
+            <Plus className="w-4 h-4" />
+            Nuevo Documento
+          </Button>
+        </div>
       </div>
 
       {loading ? (
         <p className="text-center text-gray-500 py-10">Accediendo a archivos...</p>
-      ) : docs.length === 0 ? (
+      ) : filteredDocs.length === 0 ? (
         <Card className="text-center py-20 border-dashed">
-          <p className="text-gray-500">No hay documentos almacenados.</p>
+          <p className="text-gray-500">{searchTerm ? 'No se encontraron documentos para esta búsqueda.' : 'No hay documentos almacenados.'}</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {docs.map(d => (
+          {filteredDocs.map(d => (
             <Card key={d.id} className="group hover:border-blue-500/50 transition-all cursor-pointer" onClick={() => {
               setEditingDoc(d);
               setTempName(d.decryptedName || '');

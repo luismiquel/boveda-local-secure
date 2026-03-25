@@ -6,7 +6,7 @@ import { Button, Card, Input, Modal } from '../../shared/ui';
 import { Note, ID, Template } from '../../domain/types';
 import { Printer, Trash2, Star, Plus, ClipboardList, Shield } from 'lucide-react';
 
-export const NotesPage: React.FC = () => {
+export const NotesPage: React.FC<{ searchTerm?: string }> = ({ searchTerm = '' }) => {
   const { dek } = useStore();
   const [notes, setNotes] = useState<(Note & { decryptedTitle?: string; decryptedContent?: string })[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -47,6 +47,11 @@ export const NotesPage: React.FC = () => {
   useEffect(() => {
     loadNotes();
   }, [dek, loadNotes]);
+
+  const filteredNotes = notes.filter(n => 
+    n.decryptedTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.decryptedContent?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSave = async () => {
     if (!dek || !tempTitle) return;
@@ -112,6 +117,25 @@ export const NotesPage: React.FC = () => {
       <div className="flex flex-col items-center gap-6 mb-12">
         <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-center">Mis Notas</h2>
         <div className="flex gap-4 w-full md:w-auto justify-center">
+          <Button variant="secondary" className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-8" onClick={() => {
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+            const notesHtml = filteredNotes.map(n => `
+              <div style="page-break-after: always; padding: 1in; font-family: Georgia, serif;">
+                <h1 style="font-size: 24pt; border-bottom: 2px solid #000; margin-bottom: 10px;">${n.decryptedTitle || 'Sin título'}</h1>
+                <p style="font-style: italic; color: #666;">Fecha: ${new Date(n.createdAt).toLocaleDateString()}</p>
+                <div style="white-space: pre-wrap; margin-top: 20px; font-size: 12pt; line-height: 1.6;">${n.decryptedContent}</div>
+                <footer style="margin-top: 50px; border-top: 1px solid #eee; font-size: 8pt; color: #999; text-align: center;">
+                  Documento oficial generado desde Bóveda Personal (Entorno Seguro y Local).
+                </footer>
+              </div>
+            `).join('');
+            printWindow.document.write(`<html><body onload="window.print();window.close();">${notesHtml}</body></html>`);
+            printWindow.document.close();
+          }}>
+            <Printer className="w-4 h-4" />
+            PDF
+          </Button>
           <Button variant="secondary" className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-8" onClick={() => setIsTemplateModalOpen(true)}>
             <ClipboardList className="w-4 h-4" />
             Plantillas
@@ -125,13 +149,13 @@ export const NotesPage: React.FC = () => {
 
       {loading ? (
         <p className="text-center text-gray-500 py-10">Descifrando boveda...</p>
-      ) : notes.length === 0 ? (
+      ) : filteredNotes.length === 0 ? (
         <Card className="text-center py-20 border-dashed">
-          <p className="text-gray-500">No hay notas guardadas.</p>
+          <p className="text-gray-500">{searchTerm ? 'No se encontraron notas para esta búsqueda.' : 'No hay notas guardadas.'}</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {notes.map(n => (
+          {filteredNotes.map(n => (
             <Card key={n.id} className="group hover:border-blue-500/50 transition-all cursor-pointer" onClick={() => {
               setEditingNote(n);
               setTempTitle(n.decryptedTitle || '');

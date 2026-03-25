@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Logger } from '../../infra/db';
 import { LogEvent } from '../../domain/types';
 import { Card } from '../../shared/ui';
-import { Activity, Clock, ShieldAlert, Info, Key, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Activity, Clock, ShieldAlert, Info, Key, AlertTriangle, RefreshCw, Printer } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const ActivityPage: React.FC = () => {
@@ -51,13 +51,42 @@ export const ActivityPage: React.FC = () => {
       <div className="w-full max-w-3xl space-y-4">
         <div className="flex justify-between items-center px-4">
           <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Historial Reciente</span>
-          <button 
-            onClick={loadLogs}
-            className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2 hover:text-blue-400 transition-colors"
-          >
-            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => {
+                const printWindow = window.open('', '_blank');
+                if (!printWindow) return;
+                const logsHtml = logs.map(l => `
+                  <div style="padding: 10px; border-bottom: 1px solid #eee; font-family: sans-serif; page-break-inside: avoid;">
+                    <div style="font-size: 10px; color: #666; text-transform: uppercase; font-weight: bold;">${l.action} - ${new Date(l.timestamp).toLocaleString()}</div>
+                    <div style="font-size: 12px; margin-top: 4px;">${l.details}</div>
+                  </div>
+                `).join('');
+                printWindow.document.write(`
+                  <html>
+                    <head><title>Registro de Actividad - Bóveda Personal</title></head>
+                    <body onload="window.print();window.close();" style="padding: 40px;">
+                      <h1 style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; font-family: sans-serif; text-transform: uppercase; letter-spacing: 2px;">Registro de Actividad</h1>
+                      <div style="margin-top: 20px;">${logsHtml}</div>
+                      <footer style="margin-top: 40px; text-align: center; font-size: 8px; color: #999; font-family: sans-serif;">Generado localmente desde Bóveda Personal</footer>
+                    </body>
+                  </html>
+                `);
+                printWindow.document.close();
+              }}
+              className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2 hover:text-blue-400 transition-colors"
+            >
+              <Printer className="w-3 h-3" />
+              Exportar PDF
+            </button>
+            <button 
+              onClick={loadLogs}
+              className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2 hover:text-blue-400 transition-colors"
+            >
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
+          </div>
         </div>
 
         {loading ? (

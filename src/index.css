@@ -11,9 +11,10 @@
 
 @layer base {
   body {
-    @apply bg-slate-900 text-gray-200 antialiased;
+    @apply bg-[#050505] text-gray-200 antialiased;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
   }
 }
 
@@ -21,17 +22,70 @@
   font-size: 1.25rem;
 }
 
-.senior-mode button {
-  padding: 1.5rem;
+.senior-mode h1, .senior-mode h2 {
+  font-size: 3rem !important;
 }
 
+.senior-mode p, .senior-mode span, .senior-mode input, .senior-mode textarea {
+  font-size: 1.1rem !important;
+}
+
+.senior-mode button {
+  padding: 1.5rem !important;
+  min-height: 4rem;
+}
+
+.senior-mode .nav-btn span {
+  font-size: 1.5rem !important;
+}
+
+.senior-mode .nav-btn label {
+  font-size: 0.8rem !important;
+}
+
+/* High-tech glow effects */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.2);
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f1f1f;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.3);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 #root {
