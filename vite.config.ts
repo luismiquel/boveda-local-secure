@@ -1,14 +1,16 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'url';
 import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Fix: Use path.resolve() without arguments as it defaults to the current working directory, bypassing the process.cwd() type issue
-      '@': path.resolve(),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
@@ -16,6 +18,9 @@ export default defineConfig({
     minify: 'terser',
     cssMinify: true,
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'zustand', 'dexie'],

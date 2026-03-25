@@ -1,16 +1,14 @@
 
 import { Dexie, type Table } from 'dexie';
-import { Note, Document, ShoppingItem, Appointment, Collection, LogEvent, Template } from '../domain/types';
+import { Note, Document, ShoppingItem, Appointment, Collection, LogEvent, Template, Credential, VoiceNote } from '../domain/types';
 
-/**
- * Configuración de Base de Datos Local con Dexie.js
- * Proporciona almacenamiento indexado y reactivo en el navegador.
- */
 export class BovedaDB extends Dexie {
   notes!: Table<Note>;
   documents!: Table<Document>;
   shoppingList!: Table<ShoppingItem>;
   appointments!: Table<Appointment>;
+  passwords!: Table<Credential>;
+  voiceNotes!: Table<VoiceNote>;
   collections!: Table<Collection>;
   logs!: Table<LogEvent>;
   templates!: Table<Template>;
@@ -18,14 +16,13 @@ export class BovedaDB extends Dexie {
   constructor() {
     super('BovedaDB_V3');
     
-    // Fix: Use the inherited version method correctly. 
-    // Property 'version' is a method on Dexie class used to define the schema.
-    // Using a cast to any to resolve property existence issues in certain TypeScript environments.
     (this as any).version(1).stores({
       notes: 'id, collectionId, isFavorite, createdAt, updatedAt',
       documents: 'id, collectionId, createdAt',
       shoppingList: 'id, completed, createdAt',
       appointments: 'id, date, createdAt',
+      passwords: 'id, site, createdAt',
+      voiceNotes: 'id, createdAt',
       collections: 'id, name, createdAt',
       logs: 'id, timestamp',
       templates: 'id, name'
@@ -35,9 +32,6 @@ export class BovedaDB extends Dexie {
 
 export const db = new BovedaDB();
 
-/**
- * Gestor de Logs de Actividad
- */
 export const Logger = {
   log: async (action: string, details: string) => {
     await db.logs.add({ id: crypto.randomUUID(), action, details, timestamp: Date.now() });
@@ -50,9 +44,6 @@ export const Logger = {
   getRecent: () => db.logs.orderBy('timestamp').reverse().limit(20).toArray()
 };
 
-/**
- * Repositorio para la Lista de Compras
- */
 export const ShoppingRepository = {
   getAll: () => db.shoppingList.toArray(),
   add: (item: ShoppingItem) => db.shoppingList.add(item),
@@ -60,32 +51,35 @@ export const ShoppingRepository = {
   delete: (id: string) => db.shoppingList.delete(id)
 };
 
-/**
- * Repositorio para Documentos Seguros
- */
 export const DocumentRepository = {
   getAll: () => db.documents.toArray(),
   add: (doc: Document) => db.documents.add(doc),
   delete: (id: string) => db.documents.delete(id)
 };
 
-/**
- * Repositorio para Citas y Recordatorios
- */
 export const AppointmentRepository = {
   getAll: () => db.appointments.toArray(),
   add: (app: Appointment) => db.appointments.add(app),
   delete: (id: string) => db.appointments.delete(id)
 };
 
-/**
- * Repositorio de Plantillas de Notas
- */
+export const PasswordRepository = {
+  getAll: () => db.passwords.toArray(),
+  add: (cred: Credential) => db.passwords.add(cred),
+  update: (id: string, cred: Partial<Credential>) => db.passwords.update(id, cred),
+  delete: (id: string) => db.passwords.delete(id)
+};
+
+export const VoiceNoteRepository = {
+  getAll: () => db.voiceNotes.toArray(),
+  add: (vn: VoiceNote) => db.voiceNotes.add(vn),
+  delete: (id: string) => db.voiceNotes.delete(id)
+};
+
 export const TemplateRepository = {
   seed: async () => {
     const count = await db.templates.count();
     if (count > 0) return;
-    // Usamos bulkPut en lugar de bulkAdd para evitar errores si la semilla se ejecuta en paralelo
     await db.templates.bulkPut([
       { id: 't1', name: '🩺 Médico', content: 'FECHA: \nDOCTOR: \nSÍNTOMAS: \nDIAGNÓSTICO: \nTRATAMIENTO: ' },
       { id: 't2', name: '💰 Finanzas', content: 'CONCEPTO: \nMONTO: \nCATEGORÍA: \nNOTAS: ' },

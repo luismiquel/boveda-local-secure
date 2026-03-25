@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-dark: #0a0a0a;
+  --color-dark-surface: #121212;
+  --color-dark-border: #1f1f1f;
+  --color-dark-accent: #3b82f6;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-gray-200 antialiased;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.senior-mode {
+  font-size: 1.25rem;
+}
+
+.senior-mode button {
+  padding: 1.5rem;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  border-radius: 10px;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

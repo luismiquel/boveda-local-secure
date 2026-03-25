@@ -27,18 +27,36 @@ const STORAGE_KEYS = {
   LOCK_TIME: 'bv_lock_until'
 };
 
+const getSafeJSON = (key: string, fallback: any) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
+
+const getSafeItem = (key: string) => {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    console.warn("Storage access denied", e);
+    return null;
+  }
+};
+
 export const useStore = create<BovedaState>((set, get) => ({
-  isSetup: !!localStorage.getItem(STORAGE_KEYS.CONFIG),
+  isSetup: !!getSafeItem(STORAGE_KEYS.CONFIG),
   isLocked: true,
   dek: null,
-  config: JSON.parse(localStorage.getItem(STORAGE_KEYS.CONFIG) || 'null'),
-  failedAttempts: Number(localStorage.getItem(STORAGE_KEYS.FAILURES) || '0'),
-  lockUntil: Number(localStorage.getItem(STORAGE_KEYS.LOCK_TIME) || '0') || null,
-  settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || 'null') || {
+  config: getSafeJSON(STORAGE_KEYS.CONFIG, null),
+  failedAttempts: Number(getSafeItem(STORAGE_KEYS.FAILURES) || '0'),
+  lockUntil: Number(getSafeItem(STORAGE_KEYS.LOCK_TIME) || '0') || null,
+  settings: getSafeJSON(STORAGE_KEYS.SETTINGS, {
     seniorMode: false,
     autoLockMinutes: 5,
     panicModeEnabled: false
-  },
+  }),
 
   setup: (config, dek) => {
     localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(config));

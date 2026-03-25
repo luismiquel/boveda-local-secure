@@ -49,6 +49,25 @@ export interface Appointment {
   createdAt: number;
 }
 
+export interface Credential {
+  id: ID;
+  site: EncryptedData;
+  username: EncryptedData;
+  password: EncryptedData;
+  url?: string;
+  notes?: EncryptedData;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface VoiceNote {
+  id: ID;
+  title: EncryptedData;
+  audioBlob: Blob; // Stored as Blob in IndexedDB
+  duration: number;
+  createdAt: number;
+}
+
 export interface LogEvent {
   id: ID;
   action: string;

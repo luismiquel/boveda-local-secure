@@ -52,7 +52,7 @@ export const IntroPage: React.FC<IntroProps> = ({ onComplete }) => {
   ];
 
   return (
-    <div className={`min-h-screen bg-dark text-gray-200 flex flex-col p-4 md:p-8 overflow-x-hidden ${settings.seniorMode ? 'senior-mode' : ''}`}>
+    <div className={`min-h-screen bg-slate-900 text-gray-200 flex flex-col p-4 md:p-8 overflow-x-hidden ${settings.seniorMode ? 'senior-mode' : ''}`}>
       <div className="max-w-4xl mx-auto w-full flex-grow flex flex-col gap-8 py-8 animate-in fade-in duration-700">
         
         {/* Header Section */}

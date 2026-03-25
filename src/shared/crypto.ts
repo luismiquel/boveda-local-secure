@@ -8,7 +8,10 @@ const AES_GCM = "AES-GCM";
 const PBKDF2 = "PBKDF2";
 const CANARY_SECRET = "BOVEDA_VERIFIED_V3";
 
-const buf2base64 = (buf: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const buf2base64 = (buf: ArrayBuffer | Uint8Array) => {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  return btoa(String.fromCharCode(...bytes));
+};
 const base642buf = (base64: string) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
 
 export async function deriveKEK(pin: string, salt: string, iterations: number): Promise<CryptoKey> {

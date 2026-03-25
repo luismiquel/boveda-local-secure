@@ -41,7 +41,11 @@ export const LoginPage: React.FC = () => {
         setup({ salt, iterations, encryptedDEK: wrapped, canary }, dek);
       } else {
         // LOGIN
-        const kek = await deriveKEK(pin, config!.salt, config!.iterations);
+        if (!config) {
+          setError('Error de configuración. Por favor, resetee la app.');
+          return;
+        }
+        const kek = await deriveKEK(pin, config.salt, config.iterations);
         const dek = await unwrapDEK(config!.encryptedDEK, kek);
         const isValid = await verifyDEK(dek, config!.canary);
         if (isValid) { unlock(dek); } 
@@ -54,7 +58,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6">
       <Card className="w-full max-w-sm space-y-6 border-blue-600/30">
         <header className="text-center space-y-2">
           <span className="text-5xl">🛡️</span>
