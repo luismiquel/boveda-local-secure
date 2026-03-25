@@ -83,45 +83,52 @@ const AppContent: React.FC<{ onError: (e: Error) => void }> = ({ onError }) => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col bg-slate-900 text-gray-200 selection:bg-blue-500/30 ${settings.seniorMode ? 'senior-mode' : ''}`}>
-      <header className="bg-dark-surface border-b border-dark-border p-4 flex justify-between items-center sticky top-0 z-50 no-print safe-area-top">
+    <div className={`min-h-screen flex flex-col bg-[#050505] text-gray-200 selection:bg-blue-500/30 ${settings.seniorMode ? 'senior-mode' : ''}`}>
+      <header className="bg-black/50 backdrop-blur-xl border-b border-white/5 p-4 grid grid-cols-3 items-center sticky top-0 z-50 no-print safe-area-top">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-black text-white tracking-tighter uppercase italic hidden md:block">
-            BÓVEDA <span className="text-blue-500">PERSONAL</span>
-          </h1>
-          <div className="relative">
+          <div className="relative hidden md:block">
             <input 
               type="text" 
               placeholder="Búsqueda..." 
-              className="bg-dark border border-dark-border rounded-full px-4 py-1.5 text-xs text-white w-32 md:w-64 focus:outline-none focus:border-blue-500 transition-all"
+              className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white w-64 focus:outline-none focus:border-blue-500 transition-all"
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
             />
           </div>
         </div>
-        <div className="flex gap-2">
+        
+        <div className="flex justify-center">
+          <h1 className="text-xl font-black text-white tracking-tighter uppercase italic flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            BÓVEDA <span className="text-blue-500">PERSONAL</span>
+          </h1>
+        </div>
+
+        <div className="flex justify-end gap-2">
           {settings.panicModeEnabled && (
             <button 
               onClick={() => confirm("¿PÁNICO? Se borrará TODO.") && wipe()}
-              className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase"
+              className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase shadow-[0_0_20px_rgba(220,38,38,0.3)]"
             >
               🔥 Pánico
             </button>
           )}
-          <Button variant="ghost" size="sm" onClick={lock} className="border border-dark-border">
+          <Button variant="ghost" size="sm" onClick={lock} className="border border-white/10 hover:bg-white/5">
             🔒 Bloquear
           </Button>
         </div>
       </header>
 
-      <main className="flex-grow p-4 md:p-8 pb-32 max-w-7xl mx-auto w-full">
-        {activeTab === 'notes' && <NotesPage />}
-        {activeTab === 'docs' && <DocumentsPage />}
-        {activeTab === 'passwords' && <PasswordsPage />}
-        {activeTab === 'voice' && <VoiceNotesPage />}
-        {activeTab === 'shopping' && <ShoppingPage />}
-        {activeTab === 'activity' && <ActivityPage />}
-        {activeTab === 'settings' && <SettingsPage />}
+      <main className="flex-grow p-4 md:p-12 pb-32 max-w-6xl mx-auto w-full flex flex-col items-center">
+        <div className="w-full">
+          {activeTab === 'notes' && <NotesPage />}
+          {activeTab === 'docs' && <DocumentsPage />}
+          {activeTab === 'passwords' && <PasswordsPage />}
+          {activeTab === 'voice' && <VoiceNotesPage />}
+          {activeTab === 'shopping' && <ShoppingPage />}
+          {activeTab === 'activity' && <ActivityPage />}
+          {activeTab === 'settings' && <SettingsPage />}
+        </div>
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-dark-surface/90 backdrop-blur-xl border-t border-dark-border flex justify-around items-center z-50 no-print safe-area-bottom pb-2 pt-2">

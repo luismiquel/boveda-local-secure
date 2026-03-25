@@ -100,6 +100,54 @@ export const SettingsPage: React.FC = () => {
         </Card>
       </section>
 
+      <section className="space-y-4">
+        <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Copia de Seguridad</h3>
+        <Card className="space-y-4">
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Exporta todos tus datos cifrados en un archivo JSON. Puedes usar este archivo para restaurar tu bóveda en otro dispositivo.
+          </p>
+          <Button 
+            variant="secondary" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={async () => {
+              try {
+                const allNotes = await db.notes.toArray();
+                const allDocs = await db.documents.toArray();
+                const allPasswords = await db.passwords.toArray();
+                const allShopping = await db.shoppingList.toArray();
+                
+                const backup = {
+                  version: '3.5.0',
+                  timestamp: Date.now(),
+                  data: {
+                    notes: allNotes,
+                    documents: allDocs,
+                    passwords: allPasswords,
+                    shoppingList: allShopping
+                  }
+                };
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `boveda_backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                await Logger.log("SISTEMA", "Copia de seguridad exportada correctamente");
+                alert("Copia de seguridad exportada con éxito.");
+              } catch (e) {
+                console.error(e);
+                alert("Error al exportar la copia de seguridad.");
+              }
+            }}
+          >
+            Exportar Backup (JSON)
+          </Button>
+        </Card>
+      </section>
+
       <section className="space-y-4 pt-10">
         <h3 className="text-xs font-black text-red-500 uppercase tracking-widest">Zona de Peligro</h3>
         <Card className="border-red-900/30 bg-red-900/5">

@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { encryptRaw, decryptRaw } from '../../shared/crypto';
 import { Button, Card, Input, Modal } from '../../shared/ui';
 import { Document, ID } from '../../domain/types';
+import { FileText, Printer, Trash2, Shield, Plus } from 'lucide-react';
 
 export const DocumentsPage: React.FC = () => {
   const { dek } = useStore();
@@ -90,18 +91,19 @@ export const DocumentsPage: React.FC = () => {
             Categoría: {tempCategory} | Fecha: {new Date().toLocaleDateString()}
           </p>
         </div>
-        <div className="print-body">
+        <div className="print-body" style={{ whiteSpace: 'pre-wrap' }}>
           {tempContent}
         </div>
         <div className="print-footer">
-          Documento oficial generado desde Bóveda Personal (Entorno Seguro).
+          Documento oficial generado desde Bóveda Personal (Entorno Seguro y Local).
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Documentos Seguros</h2>
-        <Button onClick={() => { setEditingDoc(null); setTempName(''); setTempContent(''); setTempCategory('General'); setIsModalOpen(true); }}>
-          + Nuevo Documento
+      <div className="flex flex-col items-center gap-6 mb-12">
+        <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-center">Documentos Seguros</h2>
+        <Button className="flex items-center gap-2 px-8" onClick={() => { setEditingDoc(null); setTempName(''); setTempContent(''); setTempCategory('General'); setIsModalOpen(true); }}>
+          <Plus className="w-4 h-4" />
+          Nuevo Documento
         </Button>
       </div>
 
@@ -126,14 +128,36 @@ export const DocumentsPage: React.FC = () => {
                   <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">{d.decryptedCategory}</span>
                   <h3 className="font-bold text-white truncate pr-4">{d.decryptedName}</h3>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); deleteDoc(d.id); }} className="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <div className="flex gap-1">
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setTempName(d.decryptedName || '');
+                      setTempContent(d.decryptedContent || '');
+                      setTempCategory(d.decryptedCategory || 'General');
+                      setTimeout(() => window.print(), 100);
+                    }} 
+                    className="text-gray-600 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                    title="Exportar a PDF"
+                  >
+                    <Printer className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); deleteDoc(d.id); }} 
+                    className="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">{d.decryptedContent}</p>
               <div className="mt-4 pt-4 border-t border-dark-border flex justify-between items-center">
                 <span className="text-[9px] text-gray-600 font-bold uppercase">{new Date(d.createdAt).toLocaleDateString()}</span>
-                <span className="text-[9px] bg-dark-border px-2 py-0.5 rounded text-gray-400 uppercase">Texto</span>
+                <div className="flex items-center gap-1">
+                  <FileText className="w-3 h-3 text-gray-600" />
+                  <span className="text-[9px] bg-dark-border px-2 py-0.5 rounded text-gray-400 uppercase">Texto</span>
+                </div>
               </div>
             </Card>
           ))}
@@ -161,10 +185,14 @@ export const DocumentsPage: React.FC = () => {
             onChange={e => setTempContent(e.target.value)}
           />
           <div className="flex gap-2">
-            <Button className="flex-grow" onClick={handleSave}>Guardar en Bóveda</Button>
+            <Button className="flex-grow flex items-center justify-center gap-2" onClick={handleSave}>
+              <Shield className="w-4 h-4" />
+              Guardar en Bóveda
+            </Button>
             {editingDoc && (
-              <Button variant="secondary" onClick={handlePrint} title="Exportar a PDF">
-                🖨️ PDF
+              <Button variant="secondary" onClick={handlePrint} className="flex items-center gap-2">
+                <Printer className="w-4 h-4" />
+                Exportar a PDF
               </Button>
             )}
             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>

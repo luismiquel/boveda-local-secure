@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { encryptRaw, decryptRaw } from '../../shared/crypto';
 import { Button, Card, Input, Modal } from '../../shared/ui';
 import { Note, ID, Template } from '../../domain/types';
+import { Printer, Trash2, Star, Plus, ClipboardList, Shield } from 'lucide-react';
 
 export const NotesPage: React.FC = () => {
   const { dek } = useStore();
@@ -100,22 +101,24 @@ export const NotesPage: React.FC = () => {
             Fecha: {new Date().toLocaleDateString()} | Bóveda Personal
           </p>
         </div>
-        <div className="print-body">
+        <div className="print-body" style={{ whiteSpace: 'pre-wrap' }}>
           {tempContent}
         </div>
         <div className="print-footer">
-          Documento generado de forma segura en Bóveda Personal.
+          Documento generado de forma segura en Bóveda Personal (Entorno 100% Local).
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Mis Notas</h2>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="secondary" className="flex-grow md:flex-grow-0" onClick={() => setIsTemplateModalOpen(true)}>
-            📋 Plantillas
+      <div className="flex flex-col items-center gap-6 mb-12">
+        <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-center">Mis Notas</h2>
+        <div className="flex gap-4 w-full md:w-auto justify-center">
+          <Button variant="secondary" className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-8" onClick={() => setIsTemplateModalOpen(true)}>
+            <ClipboardList className="w-4 h-4" />
+            Plantillas
           </Button>
-          <Button className="flex-grow md:flex-grow-0" onClick={() => { setEditingNote(null); setTempTitle(''); setTempContent(''); setIsModalOpen(true); }}>
-            + Nueva Nota
+          <Button className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-8" onClick={() => { setEditingNote(null); setTempTitle(''); setTempContent(''); setIsModalOpen(true); }}>
+            <Plus className="w-4 h-4" />
+            Nueva Nota
           </Button>
         </div>
       </div>
@@ -137,14 +140,32 @@ export const NotesPage: React.FC = () => {
             }}>
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-white truncate pr-4">{n.decryptedTitle}</h3>
-                <button onClick={(e) => { e.stopPropagation(); deleteNote(n.id); }} className="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <div className="flex gap-1">
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setTempTitle(n.decryptedTitle || '');
+                      setTempContent(n.decryptedContent || '');
+                      setTimeout(() => window.print(), 100);
+                    }} 
+                    className="text-gray-600 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                    title="Exportar a PDF"
+                  >
+                    <Printer className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); deleteNote(n.id); }} 
+                    className="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed whitespace-pre-wrap">{n.decryptedContent}</p>
               <div className="mt-4 pt-4 border-t border-dark-border flex justify-between items-center">
                 <span className="text-[9px] text-gray-600 font-bold uppercase">{new Date(n.updatedAt).toLocaleDateString()}</span>
-                {n.isFavorite && <span className="text-blue-500 text-xs">★</span>}
+                {n.isFavorite && <Star className="w-3 h-3 text-blue-500 fill-blue-500" />}
               </div>
             </Card>
           ))}
@@ -165,10 +186,14 @@ export const NotesPage: React.FC = () => {
             onChange={e => setTempContent(e.target.value)}
           />
           <div className="flex gap-2">
-            <Button className="flex-grow" onClick={handleSave}>Guardar Nota Cifrada</Button>
+            <Button className="flex-grow flex items-center justify-center gap-2" onClick={handleSave}>
+              <Shield className="w-4 h-4" />
+              Guardar Nota Cifrada
+            </Button>
             {editingNote && (
-              <Button variant="secondary" onClick={handlePrint} title="Exportar a PDF">
-                🖨️ PDF
+              <Button variant="secondary" onClick={handlePrint} className="flex items-center gap-2">
+                <Printer className="w-4 h-4" />
+                Exportar a PDF
               </Button>
             )}
             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
